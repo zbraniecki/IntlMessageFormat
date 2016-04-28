@@ -66,8 +66,8 @@ function resolveCallExpression(mf, args, builtin, options, values) {
       formatter = mf.formatters[builtin];
       return resolveCallExpression(mf,
         args,
-        formatter.formatter,
-        Object.assign(formatter.options, options),
+        formatter[0],
+        Object.assign(formatter[1] || {}, options),
         values);
   }
 }
@@ -81,7 +81,7 @@ function resolveCEArgs(args, argList) {
       case 'ext':
         let val = args[arg.name];
         if (typeof val === 'object' && val.hasOwnProperty('formatter')) {
-          values.push(val.value);
+          values = values.concat(val.values);
           options = val.options
         } else {
           values.push(args[arg.name]);
@@ -113,23 +113,29 @@ class MessageFormat {
   }
 }
 
-function createMessageArgument(formatter, options, value) {
-  if (value === undefined) {
-    return (value) => {
-      if (value === undefined) {
+function createMessageArgument(formatter, options, values) {
+  if (values === undefined) {
+    return (values) => {
+      if (values === undefined) {
         throw new Error('Cannot resolve Argument without a value');
+      }
+      if (!Array.isArray(values)) {
+        values = [values];
       }
       return {
         formatter,
         options,
-        value
+        values
       };
     };
+  }
+  if (!Array.isArray(values)) {
+    values = [values];
   }
   return {
     formatter,
     options,
-    value
+    values
   };
 }
 
