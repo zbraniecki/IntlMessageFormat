@@ -21,3 +21,9 @@ for (let id in entries) {
 
   console.log(str);
 }
+
+
+document.l10n = {
+  get: function(key, sourceValue) {
+  }
+};
