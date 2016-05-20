@@ -27,9 +27,30 @@ function formatPlaceable(mf, args, entries, p) {
       let {values, options} = resolveCEArgs(args, p.args);
       return resolveCallExpression(
         mf, args, p.name.name, options, values)
+    case 'sel':
+      let ceArgs = resolveCEArgs(args, p.exp.args);
+      let sel =
+        resolveCallExpression(mf, args, p.exp.name.name, ceArgs.options,
+            ceArgs.values);
+      return formatVariant(mf, args, entries, p.vars, sel);
     default:
-      throw new Error('Unknown placeable type: ' + p);
+      throw new Error('Unknown placeable type: ' + JSON.stringify(p));
   }
+}
+
+function formatVariant(mf, args, entries, variants, key) {
+  let defVariant;
+  for (let i = 0; i < variants.length; i++) {
+    if (variants[i].key.name === key) {
+      return formatMessage(mf, args, entries, variants[i].val);
+    } else if (variants[i].def === true) {
+      defVariant = variants[i];
+    }
+  }
+  if (defVariant) {
+    return formatMessage(mf, args, entries, defVariant.val);
+  }
+  return 'Could not resolve a variant';
 }
 
 function formatArgument(mf, args, arg) {
@@ -62,6 +83,9 @@ function resolveCallExpression(mf, args, builtin, options, values) {
       return values[0].toLocaleString(mf.locale, options);
     case 'DATE':
       return values[0].toLocaleString(mf.locale, options);
+    case 'PLURAL':
+      const pr = new Intl.PluralRules(mf.locale);
+      return pr.select(values[0]);
     default:
       formatter = mf.formatters[builtin];
       return resolveCallExpression(mf,

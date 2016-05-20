@@ -8,9 +8,10 @@ document.l10n.defineEntity('key-error-0', 'Error code 0 { $code }');
 document.l10n.defineEntity('key-error-1', 'Error code 1 { $code }');
 
 for (var i = 0; i < 2; i++) {
-  console.log(document.l10n.get('key-error-' + i, {code: i});
+  console.log(document.l10n.get('key-error-' + i, {code: i}));
 }
 
+let elem = document.getElementsByTagName('h1')[0];
 
 document.l10n.setAttributes(elem, 'key4', {
   user: 'John',
