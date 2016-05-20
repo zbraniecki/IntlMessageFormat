@@ -30,8 +30,6 @@ class Localization {
   constructor() {
     this._resCache = new Map();
 
-
-
     this.ready = init().then(({fallbackChain, resList}) => {
       this.langs = fallbackChain;
       this.lang = fallbackChain[0];
@@ -43,7 +41,18 @@ class Localization {
           FTLParser.parseResource(value).entries
         );
       }
+      L10nService.subscribe(resList.keys(), fallbackChain, this);
+      this.translateDocument();
     });
+  }
+
+  handleEvent(resList, lang) {
+    for (let [resId, value] of resList) {
+      this._resCache.get(lang).set(resId,
+        FTLParser.parseResource(value).entries
+      );
+    }
+    this.translateDocument();
   }
 
   getValue(id, args) {
@@ -54,9 +63,15 @@ class Localization {
     }
     return 'Missing entity: ' + id;
   }
+
+  translateDocument() {
+    let elems = document.querySelectorAll('*[data-l10n-id]');
+
+    for (let elem of elems) {
+      let id = elem.getAttribute('data-l10n-id');
+      elem.textContent = this.getValue(id);
+    }
+  }
 };
 
 document.l10n = new Localization();
-document.l10n.ready.then(() => {
-  console.log(document.l10n.getValue('key1', { num : 5 }));
-});
