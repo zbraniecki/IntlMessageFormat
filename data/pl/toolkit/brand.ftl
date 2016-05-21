@@ -1,0 +1,1 @@
+brandName = Produkt Testowy

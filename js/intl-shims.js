@@ -26,5 +26,5 @@ Intl.ListFormat = ListFormat;
 Intl.PluralRules = PluralRules;
 
 Intl.negotiateLanguages = function(requested, available, def, formatters) {
-  return ['en-US'];
+  return available;
 };

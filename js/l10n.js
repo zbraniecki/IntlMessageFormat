@@ -1,18 +1,19 @@
 function getResourceLinks() {
-  return [
-    '/locales/toolkit.ftl',
-    '/locales/main.ftl'
-  ];
+  return new Set([
+    '/toolkit/brand.ftl',
+    '/product/main.ftl'
+  ]);
 }
+
 
 function init() {
   let resUris = getResourceLinks();
-  let requestedLanguages = ['pl', 'en-US'];
   let resourceLanguages = L10nService.getLanguages(resUris);
+  let requestLanguages = ['fr', 'pl', 'en-US'];
   let defaultLanguage = 'en-US';
 
   let fallbackChain = Intl.negotiateLanguages(
-    requestedLanguages,
+    requestLanguages,
     resourceLanguages, 
     defaultLanguage,
     ['PluralRules', 'NumberFormat', 'DateTimeFormat']
@@ -20,6 +21,7 @@ function init() {
   return L10nService.getResources(resUris, fallbackChain[0]).then(resList => {
     return {
       fallbackChain,
+      requestLanguages,
       resList
     };
   });
@@ -30,7 +32,7 @@ class Localization {
   constructor() {
     this._resCache = new Map();
 
-    this.ready = init().then(({fallbackChain, resList}) => {
+    this.ready = init().then(({fallbackChain, requestLanguages, resList}) => {
       this.langs = fallbackChain;
       this.lang = fallbackChain[0];
       this._ctx = new Intl.MessageFormat([this.lang]);
@@ -41,7 +43,7 @@ class Localization {
           FTLParser.parseResource(value).entries
         );
       }
-      L10nService.subscribe(resList.keys(), fallbackChain, this);
+      L10nService.subscribe(new Set(resList.keys()), requestLanguages, this);
       this.translateDocument();
     });
   }
@@ -74,4 +76,5 @@ class Localization {
   }
 };
 
+L10nService.start();
 document.l10n = new Localization();
